@@ -613,7 +613,7 @@ server {
     proxy_set_header Early-Data $ssl_early_data;
 
     add_header Alt-Svc 'h3=":443"; ma=86400' always;
-    add_header Content-Security-Policy "default-src 'none'; connect-src 'self'; font-src 'self'; img-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'" always;
+    add_header Content-Security-Policy "default-src 'none'; connect-src 'self'; font-src 'self' data:; img-src 'self' data:; media-src 'self'; script-src 'self' 'wasm-unsafe-eval'; script-src-elem 'self'; style-src 'self' 'unsafe-inline'" always;
     add_header Cross-Origin-Resource-Policy "same-origin" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
