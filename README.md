@@ -564,7 +564,8 @@ gzip_min_length 1024;
 gzip_comp_level 6;
 gzip_vary on;
 gzip_proxied any;
-gzip_types text/plain text/css text/xml text/javascript
+gzip_types
+        text/plain text/css text/xml text/javascript
         application/javascript application/json application/xml
         application/rss+xml application/atom+xml
         image/svg+xml font/ttf font/opentype application/font-woff;
