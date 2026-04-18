@@ -554,23 +554,36 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
 The Nginx folder includes a `nginx.conf` file for default configuration. Place your site config files in the `conf.d` folder. Here is a minimal example:
 
 ```nginx
+server_tokens off;
+tcp_nopush on;
+tcp_nodelay on;
+
+gzip on;
+gzip_disable "MSIE [1-6]\.";
+gzip_min_length 1024;
+gzip_comp_level 6;
+gzip_vary on;
+gzip_proxied any;
+gzip_types text/plain text/css text/xml text/javascript
+        application/javascript application/json application/xml
+        application/rss+xml application/atom+xml
+        image/svg+xml font/ttf font/opentype application/font-woff;
+
 server {
     listen 80 default_server;
-    listen [::]:80 default_server;
     server_name _;
     return 444;
 }
 
 server {
     listen 80;
-    listen [::]:80;
     server_name example.com www.example.com;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl;
-    listen [::]:443 ssl;
+    listen 443 quic reuseport;
     http2 on;
     server_name example.com www.example.com;
 
@@ -588,30 +601,40 @@ server {
     ssl_stapling_verify on;
     resolver 127.0.0.1;
 
-    add_header Content-Security-Policy "default-src 'none'; connect-src 'self'; img-src 'self'" always;
+    quic_retry on;
+    ssl_early_data on;
+    quic_gso on;
+
+    proxy_set_header Early-Data $ssl_early_data;
+
+    add_header Alt-Svc 'h3=":443"; ma=86400' always;
+    add_header Content-Security-Policy "default-src 'none'; connect-src 'self'; font-src 'self' data:; img-src 'self' data:; script-src 'wasm-unsafe-eval'; script-src-elem 'self'; style-src 'self' 'unsafe-inline'" always;
     add_header Cross-Origin-Resource-Policy "same-origin" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
     add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Content-Type-Options "nosniff" always;    
 
-    gzip on;
-    gzip_disable "MSIE [1-6]\.";
-    gzip_min_length 1024;
-    gzip_vary on;
-    gzip_types
-        text/plain text/css text/xml text/javascript
-        application/javascript application/json application/xml
-        application/rss+xml application/atom+xml
-        image/svg+xml font/ttf font/opentype application/font-woff;
-    server_tokens off;
-    tcp_nopush on;
-    tcp_nodelay on;
+    location ~* \.(css|js|woff2?|ttf|otf|eot|svg|png|jpg|jpeg|gif|ico|webp|avif)$ {
+        expires max;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+        try_files $uri =404;
+    }
 
     location ~ /\. {
         deny all;
     }
 
+    location ~ \.php$ {
+        deny all;
+    }
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    error_page 404 /404.html;
     error_page 500 502 503 504 /50x.html;
 
     location = /50x.html {
