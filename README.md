@@ -572,6 +572,7 @@ gzip_types
 
 server {
     listen 80 default_server;
+    listen [::]:80 default_server;
     server_name _;
     return 444;
 }
@@ -585,6 +586,8 @@ server {
 server {
     listen 443 ssl;
     listen 443 quic reuseport;
+    listen [::]:443 ssl;
+    listen [::]:443 quic reuseport;
     http2 on;
     server_name example.com www.example.com;
 
