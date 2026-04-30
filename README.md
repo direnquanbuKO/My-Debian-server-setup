@@ -559,21 +559,20 @@ tcp_nopush on;
 tcp_nodelay on;
 
 gzip on;
-gzip_disable "MSIE [1-6]\.";
 gzip_min_length 1024;
 gzip_comp_level 6;
 gzip_vary on;
 gzip_proxied any;
 gzip_types
-    text/plain text/css text/xml text/javascript
-    application/javascript application/json application/xml
-    application/rss+xml application/atom+xml
-    image/svg+xml font/ttf font/opentype application/font-woff;
+    application/javascript application/json
+    image/svg+xml image/x-icon
+    text/css text/javascript text/plain;
+
+add_header_inherit merge;
 
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name _;
     return 444;
 }
 
@@ -581,7 +580,13 @@ server {
     listen 80;
     listen [::]:80;
     server_name example.com www.example.com;
-    return 301 https://$host$request_uri;
+    return 308 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl default_server;
+    listen [::]:443 ssl default_server;
+    ssl_reject_handshake on;
 }
 
 server {
@@ -592,35 +597,38 @@ server {
     http2 on;
     server_name example.com www.example.com;
 
+    root /var/www/html;
+    index index.html;
+
     ssl_certificate /etc/nginx/certs/example.com/fullchain.pem;
     ssl_certificate_key /etc/nginx/certs/example.com/private.key;
 
     ssl_protocols TLSv1.2 TLSv1.3;
-    ssl_ciphers HIGH:!aNULL:!MD5;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
     ssl_prefer_server_ciphers off;
+    ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1:secp384r1;
     ssl_session_cache shared:SSL:10m;
     ssl_session_tickets off;
     ssl_session_timeout 1d;
 
     ssl_stapling on;
     ssl_stapling_verify on;
+    ssl_trusted_certificate /etc/nginx/certs/example.com/cert.pem;
     resolver 127.0.0.1;
+    resolver_timeout 5s;
 
     quic_retry on;
-    ssl_early_data on;
-    quic_gso on;
-
-    proxy_set_header Early-Data $ssl_early_data;
 
     add_header Alt-Svc 'h3=":443"; ma=86400' always;
     add_header Content-Security-Policy "default-src 'none'; connect-src 'self'; font-src 'self' data:; img-src 'self' data:; media-src 'self'; script-src 'self' 'wasm-unsafe-eval'; script-src-elem 'self'; style-src 'self' 'unsafe-inline'" always;
-    add_header Cross-Origin-Resource-Policy "same-origin" always;
-    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Cross-Origin-Opener-Policy "noopener-allow-popups" always; # noopener-allow-popups, same-origin or same-origin-allow-popups
+    add_header Cross-Origin-Resource-Policy "same-origin" always; # same-origin or same-site
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always; # no-referrer, same-origin, strict-origin or strict-origin-when-cross-origin
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always; # DENY or SAMEORIGIN
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-Content-Type-Options "nosniff" always;    
 
-    location ~* \.(css|js|woff2?|ttf|otf|eot|svg|png|jpg|jpeg|gif|ico|webp|avif)$ {
+    location ~* \.(css|js|woff2?|svg|png|jpg|jpeg|gif|ico|webp|avif|mp3)$ {
         expires max;
         add_header Cache-Control "public, immutable";
         access_log off;
@@ -645,10 +653,8 @@ server {
     location = /50x.html {
         root /usr/share/nginx/html;
     }
-
-    root /var/www/html;
-    index index.html;
 }
+
 ```
 
 ---
