@@ -356,7 +356,7 @@ sysctl -p /etc/sysctl.d/swap-configuration.conf
 | `vm.swappiness` | `70` | Only swaps when ~30% of RAM is used, it shouldn't be too high. The default value is 60 |
 | `vm.vfs_cache_pressure` | `150` | Reduces cache pressure — good for low-RAM servers, but not too high. The default value is 100 |
 
-More infomation can be seen from [Gluster Docs](https://docs.gluster.org/en/main/Administrator-Guide/Linux-Kernel-Tuning) and [Official Document](https://www.kernel.org/doc/Documentation/sysctl/vm.txt)
+More infomation can be seen from [Gluster Docs](https://docs.gluster.org/en/main/Administrator-Guide/Linux-Kernel-Tuning) and [Official Documentation](https://www.kernel.org/doc/Documentation/sysctl/vm.txt)
 
 ---
 
