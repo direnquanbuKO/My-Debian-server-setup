@@ -460,7 +460,7 @@ echo 'eval "$(starship init bash)"' >> ~/.bashrc
 
 #### Configure Starship
 
-I use the Catppuccin Powerline Preset for the theme:
+Personally I use the Catppuccin Powerline Preset for the theme:
 
 ```bash
 starship preset catppuccin-powerline -o ~/.config/starship.toml
