@@ -57,7 +57,7 @@ rm lsd_1.2.0_amd64.deb duf_0.9.1_linux_amd64.deb bat_0.26.1_amd64.deb fd_10.4.2_
 Install shell utilities and configure aliases:
 
 ```bash
-mkdir -m 700 ~/.gnupg
+mkdir -p -m 700 ~/.gnupg
 modprobe softdog
 echo "softdog" | tee /etc/modules-load.d/softdog.conf
 pipx install tldr
@@ -97,6 +97,7 @@ Create a dedicated drop-in configuration file:
 tee /etc/ssh/sshd_config.d/99-custom.conf << EOF
 LoginGraceTime 30
 StrictModes yes
+PermitRootLogin prohibit-password
 PubkeyAuthentication yes
 PasswordAuthentication no
 PermitEmptyPasswords no
@@ -113,12 +114,13 @@ EOF
 | --- | --- | --- |
 | `LoginGraceTime` | `30` | Reduce login grace time for automatic disconnection if no password/key is entered for more than 30 seconds |
 | `StrictModes` | `yes` | Enable strict mode to check home directory permissions |
+| `PermitRootLogin` | `prohibit-password` | Allow root login only via SSH key (never password). Change to `no` once a non-root sudo user is set up |
 | `PubkeyAuthentication` | `yes` | Enable SSH public key login |
 | `PasswordAuthentication` | `no` | Disable password authentication (use keys only) |
 | `PermitEmptyPasswords` | `no` | Disable empty passwords |
 | `KbdInteractiveAuthentication` | `no` | Disable interactive keyboard authentication (to prevent bypassing password restrictions via PAM) |
 | `UsePAM` | `yes` | Debian requires yes by default; otherwise, it may affect some session functions |
-| `X11Forwarding` | `no` | Disable X11 Forwarding as it's an unused auth method |
+| `X11Forwarding` | `no` | Disable X11 Forwarding as it's an unused feature on a headless server |
 | `ClientAliveInterval` | `60` | For maintaining SSH session connection. The server sends a heartbeat packet every 60 seconds |
 | `ClientAliveCountMax` | `3` | Disconnect only if the client does not respond after 3 attempts |
 | `UseDNS` | `no` | Disable DNS reverse lookup |
@@ -353,10 +355,10 @@ sysctl -p /etc/sysctl.d/swap-configuration.conf
 
 | Parameter | Value | Effect |
 | --- | --- | --- |
-| `vm.swappiness` | `70` | Only swaps when ~30% of RAM is used, it shouldn't be too high. The default value is 60 |
-| `vm.vfs_cache_pressure` | `150` | Reduces cache pressure — good for low-RAM servers, but not too high. The default value is 100 |
+| `vm.swappiness` | `70` | Slightly more aggressive than the default (60). Combined with ZRAM at higher priority, memory is pushed to the fast ZRAM device sooner rather than using disk swap. Higher values = more eager swapping; lower values = swap only when RAM is nearly exhausted |
+| `vm.vfs_cache_pressure` | `150` | Causes the kernel to reclaim inode/dentry caches more aggressively than the default (100). This frees RAM faster on memory-constrained servers but may reduce filesystem performance if caches are frequently evicted |
 
-More infomation can be seen from [Gluster Docs](https://docs.gluster.org/en/main/Administrator-Guide/Linux-Kernel-Tuning) and [Official Documentation](https://www.kernel.org/doc/Documentation/sysctl/vm.txt)
+More information can be seen from [Gluster Docs](https://docs.gluster.org/en/main/Administrator-Guide/Linux-Kernel-Tuning) and [Official Documentation](https://www.kernel.org/doc/Documentation/sysctl/vm.txt)
 
 ---
 
@@ -608,14 +610,14 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305;
     ssl_prefer_server_ciphers off;
-    ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1:secp384r1;
+    ssl_ecdh_curve X25519MLKEM768:X25519:prime256v1:secp384r1; # ⚠️ X25519MLKEM768 requires OpenSSL 3.5+ and a compatible Nginx build. Remove it if on Debian 12 or unsure — check with: openssl version
     ssl_session_cache shared:SSL:10m;
     ssl_session_tickets off;
     ssl_session_timeout 1d;
 
     ssl_stapling on;
     ssl_stapling_verify on;
-    ssl_trusted_certificate /etc/nginx/certs/example.com/cert.pem;
+    ssl_trusted_certificate /etc/nginx/certs/example.com/chain.pem; # Must be the CA chain (intermediate + root), NOT the server's leaf cert — use chain.pem or ca-bundle.pem, not cert.pem
     resolver 127.0.0.1;
     resolver_timeout 5s;
 
@@ -902,4 +904,4 @@ Want to check that DNS resolution works?
 
 Want to completely delete that thing?
 
-Delete the directory. Done.
+Delete the directory. Done
