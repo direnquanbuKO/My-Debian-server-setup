@@ -553,7 +553,7 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
 
 #### Create a custom config file for your own website
 
-The Nginx folder includes a `nginx.conf` file for default configuration. Place your site config files in the `conf.d` folder. Here is an example for most static sites:
+The Nginx folder includes a `nginx.conf` file for default configuration. Place your site config files in the `conf.d` folder and backup the `default.conf` file. Here is an example for most static sites:
 
 ```nginx
 server_tokens off;
