@@ -94,7 +94,7 @@ echo "YOUR_PUBLIC_KEY_HERE" | tee ~/.ssh/authorized_keys && chmod 600 ~/.ssh/aut
 Create a dedicated drop-in configuration file:
 
 ```bash
-tee /etc/ssh/sshd_config.d/10-security-hardening.conf << EOF
+tee /etc/ssh/sshd_config.d/99-custom.conf << EOF
 LoginGraceTime 30
 StrictModes yes
 PubkeyAuthentication yes
@@ -145,7 +145,7 @@ apt install fail2ban
 **For Debian 12:**
 
 ```bash
-tee /etc/fail2ban/jail.local << EOF
+tee /etc/fail2ban/jail.d/sshd.conf << EOF
 [DEFAULT]
 ignoreip = 127.0.0.1/8 ::1
 banaction = nftables
@@ -162,7 +162,7 @@ EOF
 **For Debian 13:**
 
 ```bash
-tee /etc/fail2ban/jail.local << EOF
+tee /etc/fail2ban/jail.d/sshd.conf << EOF
 [DEFAULT]
 ignoreip = 127.0.0.1/8 ::1
 
@@ -183,36 +183,6 @@ fail2ban-client status sshd
 ---
 
 ## Firewall Configuration
-
-### Firewalld
-
-> ⚠️ **Note:** Firewalld may conflict with cloud-init on some providers.
-
-#### 1. Install firewalld
-
-```bash
-apt install firewalld
-```
-
-#### 2. Add Firewall Rules
-
-```bash
-firewall-cmd --add-service=http --permanent
-firewall-cmd --add-service=https --permanent
-```
-
-> **Optional — HTTP/3 support:**
->
-> ```bash
-> firewall-cmd --add-service=http3 --permanent
-> ```
-
-#### 3. Apply and Verify
-
-```bash
-firewall-cmd --reload
-firewall-cmd --list-all
-```
 
 ### nftables (strongly recommended)
 
@@ -257,6 +227,36 @@ EOF
 nft -c -f /etc/nftables.conf       # Validate syntax
 systemctl enable --now nftables    # Apply and enable on boot
 nft list ruleset                   # Verify the live ruleset
+```
+
+### Firewalld
+
+> ⚠️ **Note:** Firewalld may conflict with cloud-init on some providers.
+
+#### 1. Install firewalld
+
+```bash
+apt install firewalld
+```
+
+#### 2. Add Firewall Rules
+
+```bash
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+```
+
+> **Optional — HTTP/3 support:**
+>
+> ```bash
+> firewall-cmd --add-service=http3 --permanent
+> ```
+
+#### 3. Apply and Verify
+
+```bash
+firewall-cmd --reload
+firewall-cmd --list-all
 ```
 
 ---
@@ -322,7 +322,7 @@ fallocate -l 1G /swapfile
 chmod 600 /swapfile
 mkswap /swapfile
 swapon /swapfile
-echo '/swapfile none swap sw,pri=10 0 0' | tee -a /etc/fstab
+echo '/swapfile none swap sw,pri=-2 0 0' | tee -a /etc/fstab
 ```
 
 ### 2. Verify
@@ -338,23 +338,25 @@ cat /proc/swaps
 **For Debian 12 and older:**
 
 ```bash
-echo "vm.swappiness=10
-vm.vfs_cache_pressure=50" >> /etc/sysctl.conf
+echo "vm.swappiness=70
+vm.vfs_cache_pressure=150" >> /etc/sysctl.conf
 sysctl -p
 ```
 
 **For Debian 13 and newer:**
 
 ```bash
-echo "vm.swappiness=10
-vm.vfs_cache_pressure=50" >> /etc/sysctl.d/swap-configuration.conf
+echo "vm.swappiness=70
+vm.vfs_cache_pressure=150" >> /etc/sysctl.d/swap-configuration.conf
 sysctl -p /etc/sysctl.d/swap-configuration.conf
 ```
 
 | Parameter | Value | Effect |
 | --- | --- | --- |
-| `vm.swappiness` | `10` | Only swaps when ~90% of RAM is used |
-| `vm.vfs_cache_pressure` | `50` | Reduces cache pressure — good for low-RAM servers |
+| `vm.swappiness` | `70` | Only swaps when ~30% of RAM is used, it shouldn't be too high. The default value is 60 |
+| `vm.vfs_cache_pressure` | `150` | Reduces cache pressure — good for low-RAM servers, but not too high. The default value is 100 |
+
+More infomation can be seen from [Gluster Docs](https://docs.gluster.org/en/main/Administrator-Guide/Linux-Kernel-Tuning) and [official document](https://www.kernel.org/doc/Documentation/sysctl/vm.txt)
 
 ---
 
@@ -551,7 +553,7 @@ mv /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.bak
 
 #### Create a custom config file for your own website
 
-The Nginx folder includes a `nginx.conf` file for default configuration. Place your site config files in the `conf.d` folder. Here is a minimal example:
+The Nginx folder includes a `nginx.conf` file for default configuration. Place your site config files in the `conf.d` folder. Here is an example for most static sites:
 
 ```nginx
 server_tokens off;
