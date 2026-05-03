@@ -37,7 +37,7 @@ Update and upgrade the system, then install a set of practical CLI tools:
 
 ```bash
 apt update && apt upgrade -y
-apt install info curl lsof htop man bind9-dnsutils unattended-upgrades ca-certificates unzip watchdog tmux wget tre-command btop command-not-found pipx net-tools iputils-ping sudo gnupg cron -y && apt update && update-command-not-found
+apt install info curl lsof htop man-db bind9-dnsutils unattended-upgrades ca-certificates unzip watchdog tmux wget tre-command btop command-not-found pipx net-tools iputils-ping sudo gnupg cron -y && apt update && update-command-not-found
 ```
 
 Download and install additional packages from GitHub releases:
