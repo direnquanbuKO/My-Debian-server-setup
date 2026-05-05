@@ -147,6 +147,7 @@ apt install fail2ban
 **For Debian 12:**
 
 ```bash
+apt install python3-systemd
 tee /etc/fail2ban/jail.d/sshd.conf << EOF
 [DEFAULT]
 ignoreip = 127.0.0.1/8 ::1
