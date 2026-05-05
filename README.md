@@ -72,7 +72,7 @@ nano /etc/watchdog.conf
 
 > **Watchdog configuration tips:** Key parameters to set in `/etc/watchdog.conf` include `watchdog-device = /dev/watchdog` (the hardware/software watchdog device), `interval = 10` (heartbeat interval in seconds), and `max-load-1 = 24` (reboot if 1-minute load average exceeds this value).
 >
-> **Optional packages:** `apt-transport-https axel vim inxi`
+> **Optional packages:** `apt-transport-https axel vim inxi linux-headers-cloud-amd64`
 >
 > **For compilation:** `apt install autoconf automake libtool pkg-config cmake build-essential git`
 
