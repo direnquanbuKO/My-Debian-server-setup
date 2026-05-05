@@ -155,6 +155,7 @@ banaction_allports = nftables[type=allports]
 
 [sshd]
 backend = systemd
+journalmatch = _SYSTEMD_UNIT=ssh.service + _COMM=sshd
 maxretry = 3
 bantime = 1h
 mode = aggressive
