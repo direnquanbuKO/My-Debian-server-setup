@@ -33,6 +33,20 @@ A personal reference guide for setting up and hardening a Debian x86_64 cloud se
 
 ## System Upgrade & Package Installation
 
+**It's strongly recommend to change HTTP to HTTPS for APT repositories**
+
+For sources.list format
+
+```bash
+apt install ca-certificates -y && sed -i 's/http:/https:/g' /etc/apt/sources.list && apt-get update
+```
+
+For DEB822 format
+
+```bash
+apt install ca-certificates -y && sed -i 's/http:/https:/g' /etc/apt/sources.list.d/debian.sources && apt-get update
+```
+
 Update and upgrade the system, then install a set of practical CLI tools:
 
 ```bash
