@@ -77,9 +77,9 @@ mkdir -p -m 700 ~/.gnupg
 modprobe softdog
 echo "softdog" | tee /etc/modules-load.d/softdog.conf
 pipx install tldr
-curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
-echo 'eval "$(zoxide init bash)"' >> ~/.profile
+echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
 echo "alias ls='lsd'" >> ~/.bashrc
+echo "export _ZO_DOCTOR=0" >> ~/.profile
 pipx ensurepath && source ~/.bashrc && source ~/.profile
 tldr -u
 dpkg-reconfigure unattended-upgrades
