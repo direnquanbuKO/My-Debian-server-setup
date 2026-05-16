@@ -66,7 +66,8 @@ wget https://github.com/lsd-rs/lsd/releases/download/v1.2.0/lsd_1.2.0_amd64.deb 
      https://github.com/domcyrus/rustnet/releases/download/v1.2.0/Rustnet_LinuxDEB_amd64.deb \
      https://github.com/ajeetdsouza/zoxide/releases/download/v0.9.9/zoxide_0.9.9-1_amd64.deb
 
-dpkg -i lsd_1.2.0_amd64.deb duf_0.9.1_linux_amd64.deb bat_0.26.1_amd64.deb fd_10.4.2_amd64.deb Rustnet_LinuxDEB_amd64.deb zoxide_0.9.9-1_amd64.deb && apt install -f
+dpkg -i lsd_1.2.0_amd64.deb duf_0.9.1_linux_amd64.deb bat_0.26.1_amd64.deb fd_10.4.2_amd64.deb Rustnet_LinuxDEB_amd64.deb zoxide_0.9.9-1_amd64.deb
+apt install -f
 rm lsd_1.2.0_amd64.deb duf_0.9.1_linux_amd64.deb bat_0.26.1_amd64.deb fd_10.4.2_amd64.deb Rustnet_LinuxDEB_amd64.deb zoxide_0.9.9-1_amd64.deb
 ```
 
