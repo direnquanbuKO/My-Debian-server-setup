@@ -78,8 +78,8 @@ mkdir -p -m 700 ~/.gnupg
 modprobe softdog
 echo "softdog" | tee /etc/modules-load.d/softdog.conf
 pipx install tldr
-echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
 echo "alias ls='lsd'" >> ~/.bashrc
+echo 'eval "$(zoxide init bash)"' >> ~/.bashrc
 echo "export _ZO_DOCTOR=0" >> ~/.profile
 pipx ensurepath && source ~/.bashrc && source ~/.profile
 tldr -u
