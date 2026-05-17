@@ -295,13 +295,13 @@ systemctl mask systemd-timesyncd && apt purge systemd-timesyncd && apt install c
 ### 2. Add Cloudflare NTP with NTS
 
 ```bash
-echo "server time.cloudflare.com iburst nts prefer" >> /etc/chrony/conf.d/cloudflare-ntp.conf
+echo "server time.cloudflare.com iburst nts prefer" > /etc/chrony/sources.d/cloudflare-ntp.sources
 ```
 
 ### 3. Apply and Verify
 
 ```bash
-systemctl restart chrony && chronyc sources -v && chronyc authdata
+chronyc reload sources && chronyc sources -v && chronyc authdata
 ```
 
 ---
