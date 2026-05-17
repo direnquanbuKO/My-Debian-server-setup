@@ -59,10 +59,10 @@ Download and install additional packages from GitHub releases:
 > ⚠️ **Note:** The version numbers below may be outdated. Check each project's GitHub releases page for the latest version before downloading.
 
 ```bash
-wget https://github.com/lsd-rs/lsd/releases/download/v1.2.0/lsd_1.2.0_amd64.deb \
+wget https://github.com/lsd-rs/lsd/releases/download/v1.2.0/lsd-musl_1.2.0_amd64.deb \
      https://github.com/muesli/duf/releases/download/v0.9.1/duf_0.9.1_linux_amd64.deb \
-     https://github.com/sharkdp/bat/releases/download/v0.26.1/bat_0.26.1_amd64.deb \
-     https://github.com/sharkdp/fd/releases/download/v10.4.2/fd_10.4.2_amd64.deb \
+     https://github.com/sharkdp/bat/releases/download/v0.26.1/bat-musl_0.26.1_arm64.deb \
+     https://github.com/sharkdp/fd/releases/download/v10.4.2/fd-musl_10.4.2_amd64.deb \
      https://github.com/domcyrus/rustnet/releases/download/v1.2.0/Rustnet_LinuxDEB_amd64.deb \
      https://github.com/ajeetdsouza/zoxide/releases/download/v0.9.9/zoxide_0.9.9-1_amd64.deb
 
