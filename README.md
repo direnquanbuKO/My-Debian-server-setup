@@ -8,8 +8,8 @@ A personal reference guide for setting up and hardening a Debian x86_64 cloud se
 
 - [Prerequisites](#prerequisites)
 - [System Upgrade & Package Installation](#system-upgrade--package-installation)
-- [SSH Security Hardening](#ssh-security-hardening)
 - [Firewall Configuration](#firewall-configuration)
+- [SSH Security Hardening](#ssh-security-hardening)
 - [NTP Time Zone Synchronization](#ntp-time-zone-synchronization)
 - [Configure ZRAM](#configure-zram)
 - [Configure SWAP](#configure-swap)
@@ -92,6 +92,85 @@ nano /etc/watchdog.conf
 > **Optional packages:** `apt-transport-https axel vim inxi linux-headers-cloud-amd64`
 >
 > **For compilation:** `apt install autoconf automake libtool pkg-config cmake build-essential git`
+
+---
+
+## Firewall Configuration
+
+### nftables (strongly recommended)
+
+#### 1. Install nftables
+
+```bash
+apt install nftables
+```
+
+#### 2. Configure nftables
+
+```bash
+tee /etc/nftables.conf << EOF
+#!/usr/sbin/nft -f
+
+flush ruleset
+
+table inet filter {
+        chain input {
+                type filter hook input priority filter; policy drop;
+                iif lo accept
+                ct state invalid drop
+                ct state { established, related } accept
+                ip protocol icmp accept
+                ip6 nexthdr icmpv6 accept
+                tcp dport { 22, 80, 443 } accept
+                udp dport 443 accept
+        }
+        chain forward {
+                type filter hook forward priority filter; policy drop;
+        }
+        chain output {
+                type filter hook output priority filter; policy accept;
+        }
+}
+EOF
+```
+
+#### 3. Apply changes and verify
+
+```bash
+nft -c -f /etc/nftables.conf       # Validate syntax
+systemctl enable --now nftables    # Apply and enable on boot
+nft list ruleset                   # Verify the live ruleset
+```
+
+### Firewalld
+
+> ⚠️ **Note:** Firewalld may conflict with cloud-init on some providers.
+
+#### 1. Install firewalld
+
+```bash
+apt install firewalld
+```
+
+#### 2. Add Firewall Rules
+
+```bash
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-service=https --permanent
+```
+
+> **Optional — HTTP/3 support:**
+>
+> ```bash
+> firewall-cmd --add-service=http3 --permanent
+> ```
+
+#### 3. Apply and Verify
+
+```bash
+firewall-cmd --reload
+firewall-cmd --list-all
+```
 
 ---
 
@@ -199,85 +278,6 @@ Restart and verify:
 ```bash
 systemctl restart fail2ban
 fail2ban-client status sshd
-```
-
----
-
-## Firewall Configuration
-
-### nftables (strongly recommended)
-
-#### 1. Install nftables
-
-```bash
-apt install nftables
-```
-
-#### 2. Configure nftables
-
-```bash
-tee /etc/nftables.conf << EOF
-#!/usr/sbin/nft -f
-
-flush ruleset
-
-table inet filter {
-        chain input {
-                type filter hook input priority filter; policy drop;
-                iif lo accept
-                ct state invalid drop
-                ct state { established, related } accept
-                ip protocol icmp accept
-                ip6 nexthdr icmpv6 accept
-                tcp dport { 22, 80, 443 } accept
-                udp dport 443 accept
-        }
-        chain forward {
-                type filter hook forward priority filter; policy drop;
-        }
-        chain output {
-                type filter hook output priority filter; policy accept;
-        }
-}
-EOF
-```
-
-#### 3. Apply changes and verify
-
-```bash
-nft -c -f /etc/nftables.conf       # Validate syntax
-systemctl enable --now nftables    # Apply and enable on boot
-nft list ruleset                   # Verify the live ruleset
-```
-
-### Firewalld
-
-> ⚠️ **Note:** Firewalld may conflict with cloud-init on some providers.
-
-#### 1. Install firewalld
-
-```bash
-apt install firewalld
-```
-
-#### 2. Add Firewall Rules
-
-```bash
-firewall-cmd --add-service=http --permanent
-firewall-cmd --add-service=https --permanent
-```
-
-> **Optional — HTTP/3 support:**
->
-> ```bash
-> firewall-cmd --add-service=http3 --permanent
-> ```
-
-#### 3. Apply and Verify
-
-```bash
-firewall-cmd --reload
-firewall-cmd --list-all
 ```
 
 ---
