@@ -500,6 +500,7 @@ $hostname\
 ...
 
 [hostname]
+aliases = { "origin" = "actual" }
 style = "bg:red fg:crust"
 format = '[ $hostname ]($style)'
 
